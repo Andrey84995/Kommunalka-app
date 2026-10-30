@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#176b52">
+<title>Коммуналка — учёт платежей</title>
+<style>
+:root{--green:#176b52;--green2:#e1f3e9;--bg:#f4f7f5;--ink:#1b2823;--muted:#6d7b74;--line:#e0e8e3;--white:#fff;--amber:#fff0c2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px system-ui,-apple-system,Segoe UI,sans-serif}header{background:var(--green);color:white;padding:22px 18px 18px;border-radius:0 0 22px 22px}header small{opacity:.8}header h1{font-size:23px;margin:4px 0 14px}.total-label{font-size:13px;opacity:.85}.total{font-size:32px;font-weight:750;margin-top:2px}.wrap{padding:14px;max-width:760px;margin:auto}.tabs{display:flex;gap:7px;margin:2px 0 14px;overflow:auto}.tab{border:0;border-radius:12px;padding:10px 13px;background:#e8efeb;color:#456056;font-weight:650;white-space:nowrap}.tab.active{background:var(--green);color:#fff}.panel{display:none}.panel.active{display:block}.card{background:white;border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:12px;box-shadow:0 3px 12px #1231}.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}.muted{color:var(--muted);font-size:13px}.resource{display:flex;align-items:center;gap:11px}.emoji{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--green2);font-size:22px}.resource h3{margin:0 0 3px;font-size:16px}.money{margin-left:auto;text-align:right;font-weight:750}.money small{display:block;color:var(--muted);font-weight:400;font-size:12px}.section-title{font-size:17px;font-weight:750;margin:16px 2px 10px}.field{margin:11px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}input,select{width:100%;padding:12px;border:1px solid #d5e0d9;border-radius:11px;background:#fff;font:inherit;color:var(--ink)}input:focus{outline:2px solid #b4dfc8;border-color:var(--green)}button.primary{border:0;border-radius:12px;background:var(--green);color:white;padding:13px 16px;font:inherit;font-weight:700;width:100%;margin-top:8px}button.secondary{border:1px solid var(--line);border-radius:10px;background:white;padding:9px 12px;color:var(--green);font-weight:650}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hint{background:#f1f7f3;padding:11px;border-radius:12px;color:#466457;font-size:12px;line-height:1.45}.history-item{padding:12px 0;border-bottom:1px solid var(--line)}.history-item:last-child{border-bottom:0}.history-head{display:flex;justify-content:space-between;gap:8px;font-weight:700}.pill{display:inline-block;background:#edf6f0;color:#176b52;padding:4px 8px;border-radius:9px;font-size:12px}.empty{text-align:center;padding:25px;color:var(--muted)}canvas{width:100%;height:220px;display:block}.footer{color:var(--muted);font-size:11px;text-align:center;padding:12px}
+</style>
+</head>
+<body>
+<header><small>ЛИЧНЫЙ УЧЁТ ДОМА</small><h1>Коммунальные платежи</h1><div class="total-label">Итого за выбранный месяц</div><div class="total" id="heroTotal">0,00 ₽</div><small id="heroMonth">Показания ещё не внесены</small></header>
+<div class="wrap">
+<div class="tabs">
+<button class="tab active" data-tab="home">Обзор</button><button class="tab" data-tab="entry">Показания</button><button class="tab" data-tab="history">История</button><button class="tab" data-tab="chart">График</button><button class="tab" data-tab="settings">Настройки</button>
+</div>
+<section id="home" class="panel active">
+<div class="section-title">Начисления</div>
+<div id="resourceCards"></div>
+<div class="card"><div class="row"><div><div class="muted">Период</div><select id="monthSelect"></select></div><div><div class="muted">Записей за год</div><div style="font-size:25px;font-weight:750;padding-top:5px" id="recordCount">0 / 12</div></div></div></div>
+<div class="hint">Введите начальные и текущие показания, а также тариф. Приложение автоматически рассчитает расход и сумму к оплате. Данные сохраняются только на этом устройстве.</div>
+</section>
+<section id="entry" class="panel">
+<div class="section-title">Показания за месяц</div>
+<div class="card">
+<div class="field"><label>Месяц</label><input id="entryMonth" type="month"></div>
+<div class="section-title">💧 Вода</div>
+<div class="grid"><div class="field"><label>Предыдущее показание</label><input id="waterPrev" type="number" min="0" step="0.001" placeholder="0"></div><div class="field"><label>Текущее показание</label><input id="waterNow" type="number" min="0" step="0.001" placeholder="0"></div></div>
+<div class="field"><label>Тариф за единицу (₽)</label><input id="waterRate" type="number" min="0" step="0.01" placeholder="Например, 45"></div><div class="muted" id="waterCalc">Расход: — · К оплате: —</div>
+<div class="section-title">🔥 Газ</div>
+<div class="grid"><div class="field"><label>Предыдущее показание</label><input id="gasPrev" type="number" min="0" step="0.001" placeholder="0"></div><div class="field"><label>Текущее показание</label><input id="gasNow" type="number" min="0" step="0.001" placeholder="0"></div></div>
+<div class="field"><label>Тариф за единицу (₽)</label><input id="gasRate" type="number" min="0" step="0.01" placeholder="Например, 8"></div><div class="muted" id="gasCalc">Расход: — · К оплате: —</div>
+<div class="section-title">⚡ Электроэнергия</div>
+<div class="grid"><div class="field"><label>Предыдущее показание</label><input id="powerPrev" type="number" min="0" step="0.001" placeholder="0"></div><div class="field"><label>Текущее показание</label><input id="powerNow" type="number" min="0" step="0.001" placeholder="0"></div></div>
+<div class="field"><label>Тариф за единицу (₽)</label><input id="powerRate" type="number" min="0" step="0.01" placeholder="Например, 6.5"></div><div class="muted" id="powerCalc">Расход: — · К оплате: —</div>
+<button class="primary" id="saveEntry">Сохранить показания</button>
+</div>
+<div class="hint">Если тариф не менялся, приложение подставит последний использованный. В начале нового месяца перенесите текущее показание прошлого месяца в поле предыдущего.</div>
+</section>
+<section id="history" class="panel"><div class="section-title">История за 12 месяцев</div><div class="card" id="historyList"></div></section>
+<section id="chart" class="panel"><div class="section-title">Расходы по месяцам</div><div class="card"><canvas id="expenseChart" width="700" height="260"></canvas><div class="muted">Сумма начислений по каждому месяцу</div></div><div class="card" id="chartSummary"></div></section>
+<section id="settings" class="panel">
+<div class="section-title">Напоминания</div><div class="card">
+<div class="field"><label>День месяца для напоминания</label><input id="reminderDay" type="number" min="1" max="28" value="25"></div>
+<div class="field"><label>Время</label><input id="reminderTime" type="time" value="09:00"></div>
+<button class="primary" id="saveReminder">Сохранить напоминание</button>
+<p class="muted" id="reminderStatus">Напоминание не настроено.</p>
+<div class="hint">В веб-версии дата и время напоминания сохраняются в настройках, но системное уведомление зависит от браузера и может не сработать, если приложение закрыто.</div>
+</div>
+<div class="section-title">Данные</div><div class="card"><p class="muted">Все записи хранятся локально в приложении без регистрации и облака.</p><button class="secondary" id="exportData">Экспортировать резервную копию</button> <button class="secondary" id="importData">Импортировать копию</button><input id="importFile" type="file" accept="application/json" hidden><button class="secondary" id="clearData" style="color:#a33;margin-top:10px">Удалить все данные</button></div>
+</section>
+<div class="footer">Коммуналка · данные остаются на вашем устройстве</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const names={water:'Вода',gas:'Газ',power:'Электроэнергия'};
+const icons={water:'💧',gas:'🔥',power:'⚡'};
+const fields={water:['waterPrev','waterNow','waterRate'],gas:['gasPrev','gasNow','gasRate'],power:['powerPrev','powerNow','powerRate']};
+const now=new Date(); const monthKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+let data=load();
+function load(){try{return JSON.parse(localStorage.getItem('kommunalkaData')||'{"records":{},"settings":{"day":25,"time":"09:00"}}')}catch(e){return {records:{},settings:{day:25,time:'09:00'}}}}
+function persist(){localStorage.setItem('kommunalkaData',JSON.stringify(data));}
+function num(v){return v===''||v===null||v===undefined?null:Number(v)}
+function fmt(v){return Number(v||0).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₽'}
+function calc(r,k){let p=num(r[k+'Prev']),n=num(r[k+'Now']),rate=num(r[k+'Rate']);if(p===null||n===null||rate===null||n<p)return {usage:null,cost:null};let usage=n-p;return {usage,cost:usage*rate}}
+function total(r){return ['water','gas','power'].reduce((s,k)=>s+(calc(r,k).cost||0),0)}
+function monthLabel(key){if(!key)return '';let [y,m]=key.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}
+function recentKeys(){let arr=[];for(let i=0;i<12;i++){let d=new Date(now.getFullYear(),now.getMonth()-i,1);arr.push(monthKey(d))}return arr.reverse()}
+function ensureRecord(key){if(!data.records[key])data.records[key]={};return data.records[key]}
+function setTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===name));if(name==='chart')drawChart();if(name==='history')renderHistory()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+function populateMonths(){let sel=$('monthSelect');sel.innerHTML='';recentKeys().reverse().forEach(k=>{let o=document.createElement('option');o.value=k;o.textContent=monthLabel(k);sel.append(o)});sel.value=monthKey(now);$('entryMonth').value=monthKey(now)}
+function fillEntry(key){let r=data.records[key]||{};$('entryMonth').value=key;for(let k of Object.keys(fields)){let ids=fields[k];ids.forEach((id,i)=>$(id).value=r[ids[i]]??'');let c=calc(r,k);$(k+'Calc').textContent=`Расход: ${c.usage===null?'—':c.usage.toLocaleString('ru-RU',{maximumFractionDigits:3})} · К оплате: ${c.cost===null?'—':fmt(c.cost)}`}}
+function latestRate(k){let keys=Object.keys(data.records).sort().reverse();for(let key of keys){let v=data.records[key]?.[k+'Rate'];if(v!==undefined&&v!=='')return v}return ''}
+function renderHome(){let key=$('monthSelect').value||monthKey(now),r=data.records[key]||{};$('heroTotal').textContent=fmt(total(r));$('heroMonth').textContent=monthLabel(key);$('recordCount').textContent=Object.keys(data.records).filter(k=>recentKeys().includes(k)).length+' / 12';$('resourceCards').innerHTML='';for(let k of Object.keys(names)){let c=calc(r,k);let div=document.createElement('div');div.className='card';div.innerHTML=`<div class="resource"><div class="emoji">${icons[k]}</div><div><h3>${names[k]}</h3><div class="muted">${c.usage===null?'Показания не внесены':'Расход: '+c.usage.toLocaleString('ru-RU',{maximumFractionDigits:3})}</div></div><div class="money">${c.cost===null?'—':fmt(c.cost)}<small>к оплате</small></div></div>`;$('resourceCards').append(div)}}
+function renderHistory(){let el=$('historyList');let keys=recentKeys().reverse().filter(k=>data.records[k]);if(!keys.length){el.innerHTML='<div class="empty">Пока нет сохранённых показаний.<br>Добавьте первую запись во вкладке «Показания».</div>';return}el.innerHTML=keys.map(key=>{let r=data.records[key];return `<div class="history-item"><div class="history-head"><span>${monthLabel(key)}</span><span>${fmt(total(r))}</span></div><div class="muted" style="margin-top:7px">${Object.keys(names).map(k=>`${icons[k]} ${names[k]}: ${calc(r,k).usage===null?'—':calc(r,k).usage.toLocaleString('ru-RU',{maximumFractionDigits:3})} ед.`).join(' · ')}</div></div>`}).join('')}
+function drawChart(){let c=$('expenseChart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);let keys=recentKeys(),vals=keys.map(k=>data.records[k]?total(data.records[k]):0),max=Math.max(...vals,1);let left=34,bottom=34,top=15,chartH=h-top-bottom,barW=(w-left-10)/12*.58,gap=(w-left-10)/12;ctx.strokeStyle='#dce7e0';ctx.fillStyle='#6d7b74';ctx.font='12px sans-serif';for(let i=0;i<4;i++){let y=top+chartH*i/3;ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(w-5,y);ctx.stroke();ctx.fillText(Math.round(max*(1-i/3)),2,y+4)}keys.forEach((k,i)=>{let x=left+i*gap+gap*.2,val=vals[i],bh=val/max*(chartH-5);ctx.fillStyle=val?'#238565':'#dfe9e3';ctx.beginPath();ctx.roundRect(x,top+chartH-bh,barW,bh,4);ctx.fill();ctx.fillStyle='#6d7b74';ctx.fillText(k.slice(5),x+2,h-10)});let sum=vals.reduce((a,b)=>a+b,0),cnt=keys.filter(k=>data.records[k]).length;$('chartSummary').innerHTML=`<div class="row"><div><div class="muted">Начислено за период</div><b>${fmt(sum)}</b></div><div><div class="muted">Среднее за месяц</div><b>${fmt(cnt?sum/cnt:0)}</b></div></div>`}
+function refresh(){persist();renderHome();renderHistory();if($('chart').classList.contains('active'))drawChart()}
+$('monthSelect').addEventListener('change',renderHome);
+$('entryMonth').addEventListener('change',e=>{fillEntry(e.target.value);let r=data.records[e.target.value]||{};for(let k of Object.keys(fields)){if(!r[k+'Rate'])$(k+'Rate').value=latestRate(k)}})
+for(let k of Object.keys(fields)){fields[k].forEach(id=>$(id).addEventListener('input',()=>{let p=num($(k+'Prev').value),n=num($(k+'Now').value),rate=num($(k+'Rate').value);let usage=p!==null&&n!==null&&n>=p?n-p:null;let cost=usage!==null&&rate!==null?usage*rate:null;$(k+'Calc').textContent=`Расход: ${usage===null?'—':usage.toLocaleString('ru-RU',{maximumFractionDigits:3})} · К оплате: ${cost===null?'—':fmt(cost)}`}))}
+$('saveEntry').addEventListener('click',()=>{let key=$('entryMonth').value;if(!key){alert('Выберите месяц');return}let r=ensureRecord(key);for(let k of Object.keys(fields)){r[k+'Prev']=$(k+'Prev').value===''?'':Number($(k+'Prev').value);r[k+'Now']=$(k+'Now').value===''?'':Number($(k+'Now').value);r[k+'Rate']=$(k+'Rate').value===''?'':Number($(k+'Rate').value)}persist();populateMonths();$('monthSelect').value=key;refresh();setTab('home');alert('Показания сохранены')});
+$('saveReminder').addEventListener('click',()=>{let day=Math.min(28,Math.max(1,Number($('reminderDay').value)||25)),time=$('reminderTime').value||'09:00';data.settings={day,time};persist();$('reminderStatus').textContent=`Напоминание установлено: ${day}-го числа в ${time}. В веб-версии это настройка без гарантированного системного уведомления.`;alert('Настройки напоминания сохранены')});
+function reminderStatus(){let s=data.settings||{};$('reminderDay').value=s.day||25;$('reminderTime').value=s.time||'09:00';$('reminderStatus').textContent=`Напоминание: ${s.day||25}-го числа в ${s.time||'09:00'}.`}
+$('exportData').addEventListener('click',()=>{let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kommunalka-backup.json';a.click();URL.revokeObjectURL(a.href)});
+$('importData').addEventListener('click',()=>$('importFile').click());
+$('importFile').addEventListener('change',async e=>{try{let imported=JSON.parse(await e.target.files[0].text());if(!imported.records)throw Error();data=imported;persist();populateMonths();fillEntry($('entryMonth').value);reminderStatus();refresh();alert('Резервная копия импортирована')}catch(err){alert('Не удалось прочитать файл копии')}});
+$('clearData').addEventListener('click',()=>{if(confirm('Удалить все показания и настройки? Это действие нельзя отменить.')){data={records:{},settings:{day:25,time:'09:00'}};persist();populateMonths();fillEntry($('entryMonth').value);reminderStatus();refresh()}});
+populateMonths();fillEntry(monthKey(now));for(let k of Object.keys(fields))if(!$(''+k+'Rate').value)$(''+k+'Rate').value=latestRate(k);reminderStatus();renderHome();renderHistory();
+</script>
+</body></html>
