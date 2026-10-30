@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'Kommunalka_Android_Studio_Project.zip'
+      - 'Kommunalka_Android_Studio_Project_with_cloid_buid.zip'
       - '.github/workflows/build-apk.yml'
 
 permissions:
@@ -33,7 +33,7 @@ jobs:
         run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
 
       - name: Unpack Android project
-        run: unzip -q Kommunalka_Android_Studio_Project.zip -d source
+        run: unzip -q Kommunalka_Android_Studio_Project_with_cloud_bild.zip -d source
 
       - name: Install Gradle
         uses: gradle/actions/setup-gradle@v4
